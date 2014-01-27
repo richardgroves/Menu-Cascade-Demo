@@ -60,6 +60,11 @@
     [newtonButton setTarget:self selector:@selector(onNewtonClicked:)];
     [self addChild:newtonButton];
 	
+	// RAG - Richard Groves - Demo menu here
+	[self createTestMenu:ccp(self.contentSize.width/2, 0.8f*self.contentSize.height) withCascadeToItems:YES];
+	
+	[self createTestMenu:ccp(self.contentSize.width/2, 0.9f*self.contentSize.height) withCascadeToItems:NO];
+	
     // done
 	return self;
 }
@@ -84,4 +89,65 @@
 }
 
 // -----------------------------------------------------------------------
+
+#pragma mark - Create a test menu
+// Params: where on the self node the menu goes, whether to cascade the opacity and colour flags down into the menuItems (ie demo the problem)
+- (void)createTestMenu:(CGPoint)menuPos withCascadeToItems:(BOOL)cascadeToItems
+{
+	// Menu example - with cascade set to the 'menuItems'
+	NSString* item1Title = [NSString stringWithFormat:@"Item1 - %@", cascadeToItems ? @"with cascade to items" : @"without cascade to items"];
+	CCButton* item1 = [CCButton buttonWithTitle:item1Title];
+	item1.block = ^(id sender)
+	{
+		// Item 1 chosen
+	};
+	
+	CCButton* item2 = [CCButton buttonWithTitle:@"Item2"];
+	item2.block = ^(id sender)
+	{
+		// Item 2 chosen
+	};
+	
+	CCButton* item3 = [CCButton buttonWithTitle:@"Item3"];
+	item3.block = ^(id sender)
+	{
+		// Item 2 chosen
+	};
+	
+	NSArray* menuItems = @[item1, item2, item3];
+	
+	// Use 	CCLayoutBox to replicate the menu layout feature
+	CCLayoutBox* menuBox = [[CCLayoutBox alloc] init];
+	
+	// Have to set up direction and spacing before adding children
+	menuBox.direction = CCLayoutBoxDirectionHorizontal;
+	menuBox.spacing = 20.0f;
+	
+	menuBox.position = menuPos;
+	menuBox.anchorPoint = ccp(0.5f, 0.5f);
+	
+	menuBox.cascadeColorEnabled = YES;
+	menuBox.cascadeOpacityEnabled = YES;
+	
+	// No direct way of adding an array of items (and also need to flip the cascade flags on them all...)
+	for (CCNode* item in menuItems)
+	{
+		if (cascadeToItems)
+			item.cascadeColorEnabled = item.cascadeOpacityEnabled = YES;
+		
+		[menuBox addChild:item];
+	}
+	
+	// Have to do this *after* all children are added and have the cascade flags set
+	menuBox.opacity = 0.0f;
+	
+	// RAG: this will only work if cascadeToItems is YES
+	[menuBox runAction:[CCActionRepeatForever actionWithAction:[CCActionFadeIn actionWithDuration:1.0f]]];
+	
+	//	NSLog(@"Menu size: %.1f, %.1f", menuBox.contentSize.width, menuBox.contentSize.height);
+	
+	// Add the menu to this layer
+	[self addChild:menuBox];
+}
+
 @end
